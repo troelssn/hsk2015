@@ -1,0 +1,1454 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HSK 2015">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f6f6f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<title>HSK 2015 Trænerside</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f6f4;
+    --surface: #fcfcfb;
+    --border: #e4e3de;
+    --text: #0b0b0b;
+    --text-2: #52514e;
+    --text-3: #6b6a65;
+    --accent: #2a78d6;
+    --selected: #2a78d6;
+    --available: #86b6ef;
+    --declined: #eb6834;
+    --noreply: #d6d5cf;
+    --critical: #d03b3b;
+    --row-hover: #f0efec;
+    --cell-yes: #256abf;
+    --cell-no: #b8461b;
+  }
+  /* Mønstre, så kategorierne kan skelnes uden farvesyn (og på udskrift) */
+  :root {
+    --available-fill: repeating-linear-gradient(135deg, var(--available) 0 5px, var(--surface) 5px 7px);
+    --noreply-ring: inset 0 0 0 1px var(--text-3);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #121211;
+      --surface: #1a1a19;
+      --border: #2e2e2b;
+      --text: #f0efec;
+      --text-2: #c3c2b7;
+      --text-3: #94938b;
+      --accent: #3987e5;
+      --selected: #3987e5;
+      --available: #9ec5f4;
+      --declined: #d95926;
+      --noreply: #44443f;
+      --row-hover: #232321;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121211;
+    --surface: #1a1a19;
+    --border: #2e2e2b;
+    --text: #f0efec;
+    --text-2: #c3c2b7;
+    --text-3: #94938b;
+    --accent: #3987e5;
+    --selected: #3987e5;
+    --available: #9ec5f4;
+    --declined: #d95926;
+    --noreply: #44443f;
+    --row-hover: #232321;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap {
+    max-width: 1200px; margin: 0 auto;
+    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+             max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 17px; margin: 28px 0 10px; }
+  .muted { color: var(--text-2); }
+  .small { font-size: 13px; }
+  button, select, input { font: inherit; color: inherit; }
+  .btn {
+    border: 1px solid var(--border); background: var(--surface); border-radius: 8px;
+    padding: 7px 14px; cursor: pointer; min-height: 40px;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+
+  /* Login */
+  #login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+  #login .card { width: 100%; max-width: 360px; }
+  #login h1 { margin-bottom: 4px; }
+  #login label { display: block; margin: 16px 0 6px; font-weight: 600; }
+  #login input[type=password] {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg);
+    font-size: 16px; /* under 16px zoomer iOS ind ved fokus */
+  }
+  #login input[type=checkbox] { width: 20px; height: 20px; }
+  #login fieldset { border: 0; padding: 0; margin: 16px 0 0; }
+  #login legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+  .roles { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .roles input { position: absolute; opacity: 0; pointer-events: none; }
+  #login .roles label { margin: 0; padding: 10px 12px; text-align: center; cursor: pointer; background: var(--bg); }
+  #login .roles label + input + label { border-left: 1px solid var(--border); }
+  #login .roles input:checked + label { background: var(--accent); color: #fff; }
+  .roles input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -4px; }
+  .role-badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); vertical-align: middle; margin-left: 6px; }
+  #login .row { display: flex; align-items: center; gap: 8px; margin: 12px 0 16px; }
+  #login .btn { width: 100%; }
+  #loginError { color: var(--critical); min-height: 20px; margin-top: 10px; }
+
+  /* App */
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+  /* Faner og filtre bliver hængende i toppen, når man scroller */
+  .controls {
+    position: sticky; top: 0; z-index: 5; background: var(--bg);
+    margin: 16px calc(-1 * max(16px, env(safe-area-inset-left))) 0;
+    padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  }
+  /* Telefon på langs: for lidt højde til faste filtre */
+  @media (max-height: 500px) {
+    .controls { position: static; }
+  }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab {
+    border: 0; background: none; padding: 0 16px; min-height: 44px; cursor: pointer; color: var(--text-2);
+    border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
+  }
+  .tab[aria-selected=true] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px 0; }
+  .filters label { display: flex; align-items: center; gap: 8px; }
+  .filters select {
+    padding: 6px 10px; min-height: 40px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); font-size: 16px;
+  }
+  .scope { font-size: 13px; color: var(--text-2); margin: 0 0 12px; }
+  .scope strong { color: var(--text); }
+  .explain { margin: -2px 0 10px; font-size: 13px; color: var(--text-2); }
+  .explain summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+  .explain ul { margin: 4px 0 0; padding-left: 18px; }
+  .actlist .table-wrap { margin-top: 6px; font-size: 14px; color: var(--text); }
+  .actlist tbody th { white-space: normal; font-weight: 400; }
+  .actlist .sub { display: block; font-size: 12px; color: var(--text-3); }
+  .act-toggle { all: unset; box-sizing: border-box; display: flex; gap: 8px; align-items: flex-start; width: 100%; cursor: pointer; }
+  .act-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .act-toggle .chev { flex: none; width: 8px; height: 8px; margin-top: 6px; border-right: 2px solid var(--text-3); border-bottom: 2px solid var(--text-3); transform: rotate(-45deg); transition: transform .15s; }
+  .act-toggle[aria-expanded=true] .chev { transform: rotate(45deg); }
+  .act-row:has(.act-toggle[aria-expanded=true]) th, .act-row:has(.act-toggle[aria-expanded=true]) td { border-bottom: 0; }
+  .act-detail td { text-align: left; white-space: normal; padding-top: 0; padding-left: 28px; }
+  .act-group { margin: 4px 0 8px; }
+  .task-items { margin: 2px 0 6px; padding-left: 18px; line-height: 1.6; }
+  .tasklist td, .tasklist thead th { text-align: left; white-space: normal; line-height: 1.6; }
+  .act-group-head { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-2); }
+  .act-names { margin-top: 2px; line-height: 1.5; }
+  .frac { color: var(--text-3); font-size: 12px; margin-left: 6px; }
+  .low-n { color: var(--text-3); font-style: italic; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .tile .value { font-size: 28px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .tile .label { color: var(--text-2); font-size: 13px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-2); margin: 4px 0 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  /* Ingen overflow her, så kolonneoverskrifterne kan blive hængende under filtrene.
+     Bredden holdes nede ved at skjule kolonner på smalle skærme (se media queries). */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .table-wrap thead th {
+    position: sticky; top: var(--controls-h, 0px); z-index: 2; background: var(--surface);
+    box-shadow: inset 0 -1px 0 var(--border);
+  }
+  .table-wrap thead th:first-child { border-top-left-radius: 12px; }
+  .table-wrap thead th:last-child { border-top-right-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  tbody tr:last-child > * { border-bottom: 0; }
+  @media (hover: hover) {
+    tbody tr:hover, tbody tr:hover th, .grid tbody tr:hover .name { background: var(--row-hover); }
+  }
+  .mini { display: none; margin-top: 6px; }
+  .short { display: none; }
+
+  /* iPad portræt og mindre: fordelingsbjælken flytter ind under navnet */
+  @media (max-width: 900px) {
+    td.bar-cell, th.bar-cell { display: none; }
+    .mini { display: block; }
+    .table-wrap tbody th { white-space: normal; min-width: 150px; }
+  }
+  /* Smal tablet/telefon: kun de vigtigste kolonner; resten ses i bjælken */
+  @media (max-width: 760px) {
+    .opt { display: none; }
+    .frac { display: block; margin: 0; }
+  }
+  /* iPhone */
+  @media (max-width: 640px) {
+    th, td { padding: 9px 8px; }
+    thead th { white-space: normal; vertical-align: bottom; }
+    .table-wrap tbody th { min-width: 0; width: 55%; }
+    h1 { font-size: 19px; }
+    .tile { padding: 12px; }
+    .tile .value { font-size: 24px; }
+    .tiles { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .tiles:has(> :nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
+    header { flex-wrap: nowrap; align-items: flex-start; }
+    header .btn { padding: 6px 10px; white-space: nowrap; flex-shrink: 0; }
+    .tab { padding: 0 12px; flex: 1; }
+    .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; padding: 10px 0; }
+    .filters label { flex-direction: column; align-items: stretch; gap: 2px; font-size: 12px; }
+    .filters select { width: 100%; padding: 4px 6px; }
+    .long { display: none; }
+    .short { display: inline; }
+    .grid .name { white-space: normal; max-width: 110px; min-width: 90px; font-size: 12px; line-height: 1.25; }
+  }
+  thead th { font-size: 13px; color: var(--text-2); font-weight: 600; user-select: none; }
+  tbody th { font-weight: 400; text-align: left; }
+  th[aria-sort=ascending]::after { content: " ▲"; font-size: 10px; }
+  th[aria-sort=descending]::after { content: " ▼"; font-size: 10px; }
+  th[data-table]:not([aria-sort])::after { content: " ↕"; font-size: 10px; opacity: .45; }
+  @media (pointer: coarse) {
+    th[data-table] { height: 44px; }
+  }
+  td.bar-cell { width: 34%; min-width: 180px; }
+  .bar { display: flex; gap: 2px; height: 14px; }
+  .bar > div { height: 100%; }
+  .bar > div:first-child { border-radius: 4px 0 0 4px; }
+  .bar > div:last-child { border-radius: 0 4px 4px 0; }
+  .bar > div:only-child { border-radius: 4px; }
+
+  /* Egen scroll-boks, så datoerne og navnene bliver stående når man scroller i oversigten */
+  .grid-wrap {
+    overflow: auto; max-height: 70vh; overscroll-behavior: contain;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  }
+  .grid { border-collapse: separate; border-spacing: 2px; }
+  .grid th, .grid td { border: 0; padding: 0; }
+  .grid thead th {
+    font-size: 12px; font-weight: 500; color: var(--text-2); padding: 4px 2px; cursor: default; text-align: center;
+    position: sticky; top: 0; z-index: 2; background: var(--surface);
+  }
+  .grid thead th:first-child { left: 0; z-index: 3; }
+  .grid .name {
+    padding: 0 10px 0 8px; font-size: 13px; font-weight: 400; color: var(--text); text-align: left;
+    position: sticky; left: 0; background: var(--surface); z-index: 1;
+  }
+  .cell {
+    width: 30px; height: 24px; border-radius: 4px; text-align: center; font-size: 12px; line-height: 24px;
+    color: #fff; font-weight: 700;
+  }
+  .cell.s-noreply { color: var(--text); box-shadow: var(--noreply-ring); }
+  @media (pointer: coarse) {
+    .cell { width: 32px; height: 30px; line-height: 30px; }
+  }
+
+  .upcoming { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+  .upcoming h3 { margin: 0; font-size: 16px; }
+  .upcoming .when { color: var(--text-2); font-size: 13px; margin-bottom: 10px; }
+  .group { margin-top: 10px; }
+  .group-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .group-names { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+  .empty { color: var(--text-3); font-style: italic; }
+
+  /* Info */
+  .info { max-width: 1100px; }
+  .info h2 { font-size: 18px; margin: 20px 0 8px; }
+  .info .info-intro h2 { margin-top: 0; }
+  .info-intro p { margin: 0 0 8px; max-width: 70ch; }
+  .info-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+  .info-grid h3 { margin: 0 0 6px; font-size: 16px; color: var(--accent); }
+  .info-grid p { margin: 0 0 8px; }
+  .info-grid ul, .info-grid ol, .info-facts { margin: 0; padding-left: 20px; }
+  .info-grid li, .info-facts li { margin: 4px 0; }
+  .info-facts { line-height: 1.5; }
+
+  /* Kommunikation */
+  .comms { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 900px) { .comms { grid-template-columns: minmax(0, 1fr); } }
+  .comms .card h3 { margin: 0 0 4px; font-size: 16px; }
+  .comms-form { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: end; margin-bottom: 12px; }
+  .comms-form label { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--text-2); max-width: 100%; }
+  .comms-form select, .comms-form input {
+    padding: 6px 10px; min-height: 40px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); font-size: 16px; max-width: 100%;
+  }
+  .comms-form select { width: min(360px, 100%); }
+  .comms-form input[type=number] { width: 80px; }
+  .comms-form input[type=text] { width: 160px; }
+  .comms-form label.check { flex-direction: row; align-items: center; gap: 8px; min-height: 40px; color: var(--text); }
+  .comms-form label.check input { width: 20px; height: 20px; min-height: 0; }
+  .pick-list { list-style: none; margin: 8px 0 0; padding: 0; }
+  .pick-list li { display: flex; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--border); }
+  .pick-list li:first-child { border-top: 0; }
+  .pick-list input { width: 20px; height: 20px; flex: none; }
+  .pick-list label { flex: 1; min-width: 0; }
+  .comms .why { display: block; font-size: 12px; color: var(--text-3); }
+  .task-assign .why { display: inline; }
+  .rule { font-size: 11px; border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; color: var(--text-2); white-space: nowrap; }
+  .task-assign { margin: 8px 0 0; padding: 0; list-style: none; }
+  .task-assign li { padding: 4px 0; }
+  .task-row { border-top: 1px solid var(--border); padding: 8px 0 !important; }
+  .task-row:first-child { border-top: 0; }
+  .task-row > b { display: block; margin-bottom: 4px; }
+  .slot { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; margin: 4px 0; }
+  .slot select { min-height: 40px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--text); font-size: 16px; width: min(260px, 100%); }
+  .slot .why { display: inline; }
+  .slot-actions { margin-top: 2px; }
+  .mail { width: 100%; min-height: 200px; font: 16px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: var(--bg); color: var(--text); resize: vertical; }
+  .mail-actions { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .dbu-assign { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .dbu-assign p { margin: 6px 0 0; }
+  .linkbtn { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
+
+  #tip {
+    position: fixed; pointer-events: none; z-index: 10; background: var(--text); color: var(--bg);
+    font-size: 12px; padding: 5px 8px; border-radius: 6px; max-width: 260px; display: none;
+  }
+  [hidden] { display: none !important; }
+
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  th .sort {
+    all: unset; cursor: pointer; display: inline-block; width: 100%; text-align: inherit; box-sizing: border-box;
+  }
+  th .sort:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* Udskrift til trænermøde: kun indholdet, farver og mønstre bevares */
+  @media print {
+    :root { color-scheme: light; }
+    body { background: #fff; font-size: 11pt; }
+    .wrap { max-width: none; padding: 0; }
+    .controls .tabs, #logout, #tip, .explain summary, .mini { display: none !important; }
+    .controls { position: static; margin: 0; padding: 0; }
+    .filters { padding: 4px 0; }
+    .filters select { border: 0; background: none; min-height: 0; padding: 0; appearance: none; font-weight: 600; }
+    .explain[open] summary, .explain { display: block; }
+    .table-wrap, .grid-wrap, .card { border: 1px solid #ccc; box-shadow: none; }
+    .grid-wrap { overflow: visible; max-height: none; }
+    .table-wrap thead th, .grid th { position: static; }
+    td.bar-cell, th.bar-cell { display: table-cell !important; }
+    .opt { display: table-cell !important; }
+    .cell, .bar > div, .swatch { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    tr, .card { break-inside: avoid; }
+    h2 { break-after: avoid; }
+    th[data-table]::after { content: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<section id="login">
+  <form class="card" id="loginForm">
+    <h1>HSK Årgang 2015</h1>
+    <div class="muted small">Fremmøde og udtagelser</div>
+    <fieldset>
+      <legend>Log ind som</legend>
+      <div class="roles">
+        <input type="radio" name="role" id="role-traener" value="traener" checked>
+        <label for="role-traener">Træner</label>
+        <input type="radio" name="role" id="role-holdleder" value="holdleder">
+        <label for="role-holdleder">Holdleder</label>
+      </div>
+    </fieldset>
+    <label for="pw" id="pwLabel">Trænerkode</label>
+    <input type="password" id="pw" autocomplete="current-password" required autofocus>
+    <div class="row">
+      <input type="checkbox" id="remember">
+      <label for="remember" style="margin:0;font-weight:400">Husk mig på denne enhed</label>
+    </div>
+    <button class="btn primary" type="submit" id="loginBtn">Log ind</button>
+    <div id="loginError" role="alert"></div>
+  </form>
+</section>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div>
+      <h1 id="appTitle" tabindex="-1">HSK Årgang 2015 Drenge <span class="role-badge" id="roleBadge"></span></h1>
+      <div class="muted small" id="updated"></div>
+    </div>
+    <button class="btn" id="logout">Log ud</button>
+  </header>
+
+  <div class="controls">
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabbtn-info" aria-controls="tab-info" data-tab="info" aria-selected="true">Info</button>
+      <button class="tab" role="tab" id="tabbtn-matches" aria-controls="tab-matches" data-tab="matches" aria-selected="false" tabindex="-1">Kampe</button>
+      <button class="tab" role="tab" id="tabbtn-training" aria-controls="tab-training" data-tab="training" aria-selected="false" tabindex="-1">Træning</button>
+      <button class="tab" role="tab" id="tabbtn-upcoming" aria-controls="tab-upcoming" data-tab="upcoming" aria-selected="false" tabindex="-1">Kommende</button>
+      <button class="tab" role="tab" id="tabbtn-tasks" aria-controls="tab-tasks" data-tab="tasks" aria-selected="false" tabindex="-1">Opgaver</button>
+      <button class="tab" role="tab" id="tabbtn-comms" aria-controls="tab-comms" data-tab="comms" aria-selected="false" tabindex="-1">Kommunikation</button>
+    </nav>
+
+    <div class="filters" id="filters">
+      <label class="small muted">Seneste
+        <select id="lastN">
+          <option value="0">Alle</option>
+          <option value="3">3</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
+      </label>
+      <label class="small muted">Periode
+        <select id="period"><!-- udfyldes med ét valg pr. år, når data er dekrypteret --></select>
+      </label>
+      <label class="small muted" id="taskTypeLabel">Type
+        <select id="taskType">
+          <option value="all">Alle opgaver</option>
+          <option value="Tøjvask">Tøjvask</option>
+          <option value="Kørsel">Kørsel</option>
+          <option value="Snack">Snack</option>
+          <option value="Kiosk">Kiosk</option>
+        </select>
+      </label>
+      <label class="small muted" id="matchTypeLabel">Type
+        <select id="matchType">
+          <option value="Kamp">Kampe</option>
+          <option value="all">Kampe + stævner</option>
+          <option value="stævne">Stævner</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <section id="tab-matches" role="tabpanel" aria-labelledby="tabbtn-matches" tabindex="0" hidden></section>
+  <section id="tab-training" role="tabpanel" aria-labelledby="tabbtn-training" tabindex="0" hidden></section>
+  <section id="tab-upcoming" role="tabpanel" aria-labelledby="tabbtn-upcoming" tabindex="0" hidden></section>
+  <section id="tab-tasks" role="tabpanel" aria-labelledby="tabbtn-tasks" tabindex="0" hidden></section>
+  <section id="tab-comms" role="tabpanel" aria-labelledby="tabbtn-comms" tabindex="0" hidden></section>
+  <section id="tab-info" role="tabpanel" aria-labelledby="tabbtn-info" tabindex="0" hidden>
+    <div class="info">
+      <div class="card info-intro">
+        <h2>Hvad er siden til?</h2>
+        <p>Siden samler alt fra DBU KampKlar om HSK Årgang 2015 Drenge ét sted. Den skal gøre det let at fordele spilletid og opgaver <b>fair</b> og at skrive beskeden til forældrene før en kamp.</p>
+        <p class="muted small">Brug fanerne øverst. Siden husker, hvilken fane du sidst brugte. Under hver tabel kan du folde „Sådan læses tallene“ ud for detaljer.</p>
+      </div>
+
+      <h2>Fanerne</h2>
+      <div class="info-grid">
+        <article class="card">
+          <h3>Kampe</h3>
+          <p>Hvor ofte hver spiller har været <b>til rådighed</b>, og hvor ofte han er blevet <b>udtaget</b>.</p>
+          <ul>
+            <li><b>Brug den til:</b> at se, hvem der står for tur til at komme med.</li>
+            <li><b>Udtaget %</b> = udtaget ÷ til rådighed. Afbud tæller ikke imod spilleren.</li>
+            <li>Vælg de seneste N kampe, et år, og om stævner skal med.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Træning</h3>
+          <p>Fremmøde til træning pr. spiller og en oversigt over hver træning.</p>
+          <ul>
+            <li><b>Brug den til:</b> at følge, hvem der kommer stabilt, og hvem der ikke svarer.</li>
+            <li>Farverne viser tilmeldt, frameldt og ikke svaret. Hold musen over (eller tryk på) en celle for at se datoen.</li>
+            <li>Oversigten åbner ved de nyeste træninger.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Kommende</h3>
+          <p>De næste aktiviteter, og hvem der har svaret hvad i DBU.</p>
+          <ul>
+            <li><b>Brug den til:</b> et hurtigt overblik før weekenden: hvem er udtaget, til rådighed, frameldt eller mangler at svare.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Opgaver</h3>
+          <p>Hvor mange gange hver familie har haft <b>tøjvask, kørsel, snack og kiosk</b>, og hvornår sidst.</p>
+          <ul>
+            <li><b>Brug den til:</b> at se, hvem der står for tur til en opgave. Sortér på kolonnen.</li>
+            <li>Tryk på en spiller for at se alle hans opgaver.</li>
+            <li>Historik før sep. 2026 kommer fra holdlederens Excel-ark, nyere fra DBU.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Kommunikation</h3>
+          <p>Laver en <b>færdig besked til DBU-appen</b> før en kamp eller et stævne.</p>
+          <ol>
+            <li>Vælg aktiviteten.</li>
+            <li>Tjek spillerne. Er holdet udtaget i DBU, bruges det. Ellers foreslås dem, der har været med færrest gange i de seneste 10 kampe.</li>
+            <li>Tjek opgaverne: 1 tøjvask, 1 snack og 3 kørsel. De går til dem, der har haft opgaven færrest gange det seneste år.</li>
+            <li>Ret mødetid og mødested, og tryk <b>Kopiér mail</b>. Indsæt i DBU-appen.</li>
+          </ol>
+          <p class="muted small">Trænerregler i forslaget: Jonas og Troels kører, når de kommer og deres søn er med; kørslen står på Theo og Emil R. Theo og Emil R. er altid med og foreslås ikke til snack eller tøjvask, men du kan selv vælge dem. Ingen kørsel ved hjemmekampe i Hadsten.</p>
+        </article>
+      </div>
+
+      <h2>Godt at vide</h2>
+      <div class="card">
+        <ul class="info-facts">
+          <li><b>Opdatering:</b> data hentes automatisk fra DBU KampKlar hver nat. Tidspunktet står under titlen.</li>
+          <li><b>Kun visning:</b> siden ændrer intet i DBU. Udtagelse og opgaver sættes stadig i DBU.</li>
+          <li><b>Privat:</b> data er krypteret og kan kun åbnes med træner- eller holdlederkoden. Del ikke koden.</li>
+          <li><b>Log ud</b> på delte computere. Ellers husker browseren koden.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+// "Kamp" er turneringskampe (fra 2025); "Øvrige kampe" er træningskampe, også fra årene før
+const GAME_TYPES = ["Kamp", "Øvrige kampe"];
+const MATCH_TYPES = [...GAME_TYPES, "Stævne", "DBU-Stævne"];
+const TRAINING_TYPE = "Træning";
+const TABS = ["info", "matches", "training", "upcoming", "tasks", "comms"];
+const STORAGE_KEY = "hsk2015-trainer-code";
+const PREFS_KEY = "hsk2015-trainer-prefs";
+
+let DATA = null;
+// Standard er kun turneringskampe: ved stævner tæller en tilmelding som udtagelse, hvilket forvrænger fair-billedet
+const THIS_YEAR = String(new Date().getFullYear());
+// period: "every" (alle år), "2026" (hele året), "2026-1" (forår), "2026-2" (efterår) eller "30" (seneste 30 dage)
+const state = { tab: "info", period: THIS_YEAR, matchType: "Kamp", taskType: "all", lastN: 0, sort: {}, openActs: new Set() };
+
+// Husk faneblad og filtre pr. enhed
+try { Object.assign(state, JSON.parse(localStorage.getItem(PREFS_KEY) || "{}"), { sort: {}, openActs: new Set() }); } catch {}
+// Gemte valg fra før der var flere år, hvor "all"/"spring"/"autumn" betød 2026
+state.period = { all: THIS_YEAR, spring: THIS_YEAR + "-1", autumn: THIS_YEAR + "-2" }[state.period] ?? state.period;
+const savePrefs = () => {
+  const { tab, period, matchType, taskType, lastN } = state;
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify({ tab, period, matchType, taskType, lastN })); } catch {}
+};
+
+// ---------- Login / dekryptering ----------
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+async function decrypt(enc, password) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: b64(enc.salt), iterations: enc.iterations, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(enc.iv) }, key, b64(enc.ciphertext));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+// Hver rolle har sin egen kode og datafil, så rollerne senere kan få forskelligt indhold
+const ROLES = {
+  traener: { label: "Træner", code: "Trænerkode", file: "data.traener.enc.json" },
+  holdleder: { label: "Holdleder", code: "Holdlederkode", file: "data.holdleder.enc.json" },
+};
+let ROLE = "traener";
+
+// Husket login: {role, code}. Ældre versioner gemte kun trænerkoden som tekst.
+const store = {
+  get() {
+    try {
+      const v = localStorage.getItem(STORAGE_KEY);
+      if (!v) return null;
+      try { const o = JSON.parse(v); if (ROLES[o.role] && o.code) return o; } catch {}
+      return { role: "traener", code: v };
+    } catch { return null; }
+  },
+  set(role, code) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ role, code })); } catch {} },
+  clear() { try { localStorage.removeItem(STORAGE_KEY); } catch {} },
+};
+
+const pw = document.getElementById("pw");
+const selectedRole = () => document.querySelector("input[name=role]:checked").value;
+function setRole(role) {
+  document.getElementById("role-" + role).checked = true;
+  document.getElementById("pwLabel").textContent = ROLES[role].code;
+}
+for (const r of document.querySelectorAll("input[name=role]")) r.addEventListener("change", () => setRole(selectedRole()));
+
+async function login(role, password, remember) {
+  const btn = document.getElementById("loginBtn");
+  const err = document.getElementById("loginError");
+  btn.disabled = true; btn.textContent = "Åbner…"; err.textContent = "";
+  try {
+    const res = await fetch(ROLES[role].file, { cache: "no-store" });
+    if (!res.ok) throw new Error("fetch");
+    const enc = await res.json();
+    DATA = await decrypt(enc, password);
+    ROLE = role;
+    if (remember) store.set(role, password);
+    pw.removeAttribute("aria-invalid");
+    showApp();
+  } catch (e) {
+    store.clear();
+    document.getElementById("login").hidden = false;
+    err.textContent = e.message === "fetch" ? "Kunne ikke hente data. Prøv igen." : "Forkert kode.";
+    if (e.message !== "fetch") { pw.setAttribute("aria-invalid", "true"); pw.focus(); pw.select(); }
+  } finally {
+    btn.disabled = false; btn.textContent = "Log ind";
+  }
+}
+
+document.getElementById("loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  login(selectedRole(), document.getElementById("pw").value, document.getElementById("remember").checked);
+});
+// Log ud: glem koden og fjern alle spillerdata fra siden
+document.getElementById("logout").addEventListener("click", () => {
+  store.clear(); DATA = null;
+  for (const t of TABS) document.getElementById("tab-" + t).innerHTML = "";
+  document.getElementById("updated").textContent = "";
+  document.getElementById("remember").checked = false;
+  document.getElementById("app").hidden = true;
+  document.getElementById("login").hidden = false;
+  pw.value = "";
+  pw.focus();
+});
+
+// ---------- Data ----------
+const today = new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD lokal tid
+const fmtDate = iso => new Date(iso + "T12:00:00").toLocaleDateString("da-DK",
+  { weekday: "short", day: "numeric", month: "short", ...(iso.startsWith(THIS_YEAR) ? {} : { year: "numeric" }) });
+const shortDate = iso => { const [, m, d] = iso.split("-"); return `${+d}/${+m}`; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = (a, b) => b ? Math.round(100 * a / b) : null;
+
+function inPeriod(date) {
+  const p = state.period;
+  if (p === "every") return true;
+  if (p === "30") {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    return date >= d.toLocaleDateString("sv-SE");
+  }
+  const [year, half] = p.split("-");
+  if (!date.startsWith(year)) return false;
+  if (half === "1") return date.slice(5) <= "06-30";
+  if (half === "2") return date.slice(5) >= "07-01";
+  return true;
+}
+
+// Periodevalg: seneste 30 dage, hvert år med data (nyeste først, med forår/efterår) og alle år
+function fillPeriods() {
+  const el = document.getElementById("period");
+  const years = [...new Set(DATA.activities.map(a => a.date.slice(0, 4)))].sort().reverse();
+  const opt = (value, label) => `<option value="${value}">${esc(label)}</option>`;
+  el.innerHTML = opt("30", "Seneste 30 dage") +
+    years.map(y => `<optgroup label="${y}">${opt(y, `Hele ${y}`)}${opt(y + "-1", `Forår ${y} (jan–jun)`)}${opt(y + "-2", `Efterår ${y} (jul–dec)`)}</optgroup>`).join("") +
+    opt("every", `Alle år (${years.at(-1)}–${years[0]})`);
+  el.value = state.period;
+  if (el.selectedIndex < 0) { state.period = years.includes(THIS_YEAR) ? THIS_YEAR : years[0]; el.value = state.period; }
+}
+
+// Afviklede aktiviteter i perioden, sorteret efter dato; begrænset til de seneste N hvis valgt.
+function pastActivities(predicate) {
+  const acts = DATA.activities
+    .filter(a => a.date < today && inPeriod(a.date) && predicate(a))
+    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  return state.lastN ? acts.slice(-state.lastN) : acts;
+}
+
+// Returnerer HTML: hvilke aktiviteter tallene bygger på, og om "Seneste N" blev begrænset af perioden
+function scopeHtml(acts, noun) {
+  if (!acts.length) return `Ingen ${esc(noun)} i det valgte udsnit.`;
+  const range = acts.length === 1 ? fmtDate(acts[0].date) : `${fmtDate(acts[0].date)} – ${fmtDate(acts.at(-1).date)}`;
+  if (state.lastN && acts.length < state.lastN) {
+    return `<strong>Kun ${acts.length} ${esc(noun)}</strong> i den valgte periode (du har valgt seneste ${state.lastN}): ${esc(range)}`;
+  }
+  return `${state.lastN ? "Seneste " : ""}${acts.length} ${esc(noun)}: ${esc(range)}`;
+}
+
+// "75 %" + antal ("6/8"); nedtonet når tallet bygger på under 3
+function rateHtml(rate, n, total, unit) {
+  if (rate === null) return "–";
+  const low = total < 3;
+  return `<span class="${low ? "low-n" : ""}"${low ? ` data-tip="Bygger kun på ${total} ${unit}"` : ""}>${rate} %</span><span class="frac">${n}/${total}</span>`;
+}
+
+function statusIndex() {
+  const idx = new Map();
+  for (const [aid, pid, status] of DATA.attendance) idx.set(aid + "|" + pid, status);
+  return idx;
+}
+
+// ---------- Tabel med sortering ----------
+// detail (valgfri): (række, antal kolonner) => skjult udfoldningsrække efter hver række
+function renderTable(key, columns, rows, defaultSort, detail) {
+  const sort = state.sort[key] ??= defaultSort;
+  rows = [...rows].sort((a, b) => {
+    const va = a[sort.key], vb = b[sort.key];
+    // Spillere uden data ("–") altid nederst, uanset retning
+    if (va == null || vb == null) return (va == null) - (vb == null);
+    const cmp = typeof va === "string" ? va.localeCompare(vb, "da") : va - vb;
+    return (sort.dir === "asc" ? cmp : -cmp) || a.name.localeCompare(b.name, "da");
+  });
+  const cls = c => [c.cls, c.opt && "opt"].filter(Boolean).join(" ");
+  const label = c => c.short ? `<span class="long">${c.label}</span><span class="short">${c.short}</span>` : c.label;
+  const head = columns.map(c => c.key === "bar" ? `<th scope="col" class="${cls(c)}" style="cursor:default">${label(c)}</th>` :
+    `<th scope="col" class="${cls(c)}" data-table="${key}" data-key="${c.key}" data-first="${c.firstDir || (c.key === "name" ? "asc" : "desc")}" ${c.key === sort.key ? `aria-sort="${sort.dir === "asc" ? "ascending" : "descending"}"` : ""}><button type="button" class="sort">${label(c)}</button></th>`
+  ).join("");
+  const body = rows.map(r => `<tr${detail ? ' class="act-row"' : ""}>${columns.map((c, i) => {
+    const tag = i === 0 ? `th scope="row"` : "td";
+    return `<${tag} class="${cls(c)}">${c.render ? c.render(r) : esc(r[c.key] ?? "–")}</${tag.split(" ")[0]}>`;
+  }).join("")}</tr>${detail ? detail(r, columns.length) : ""}`).join("");
+  return `<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+document.addEventListener("click", e => {
+  const th = e.target.closest("th[data-table]");
+  if (!th) return;
+  const key = th.dataset.table, col = th.dataset.key;
+  const cur = state.sort[key];
+  state.sort[key] = cur.key === col
+    ? { key: col, dir: cur.dir === "desc" ? "asc" : "desc" }
+    : { key: col, dir: th.dataset.first };
+  render();
+  document.querySelector(`th[data-table="${key}"][data-key="${col}"] .sort`)?.focus();
+});
+
+// Baggrund for en kategori: mønster for "til rådighed", kant om den lyse "ikke svaret"
+const fill = color => color === "--available" ? "background:var(--available-fill)"
+  : color === "--noreply" ? `background:var(${color});box-shadow:var(--noreply-ring)`
+  : `background:var(${color})`;
+
+function bar(segments) {
+  const parts = segments.filter(s => s.n);
+  if (!parts.length) return `<span class="empty">ingen</span>`;
+  const text = parts.map(s => `${s.label} ${s.n}`).join(", ");
+  return `<div class="bar" role="img" aria-label="${esc(text)}">${parts.map(s =>
+    `<div style="flex:${s.n};${fill(s.color)}" data-tip="${esc(s.label)}: ${s.n}"></div>`).join("")}</div>`;
+}
+
+function legend(items) {
+  return `<div class="legend">${items.map(i => `<span><i class="swatch" style="${fill(i.color)}" aria-hidden="true"></i>${i.label}</span>`).join("")}</div>`;
+}
+
+function tiles(items) {
+  return `<div class="tiles">${items.map(t => `<div class="card tile"><div class="value">${t.value}</div><div class="label">${t.label}</div></div>`).join("")}</div>`;
+}
+
+// ---------- Kampe ----------
+function renderMatches() {
+  const idx = statusIndex();
+  const acts = pastActivities(a => MATCH_TYPES.includes(a.type) &&
+    (state.matchType === "all" || (state.matchType === "Kamp") === GAME_TYPES.includes(a.type)));
+  const noun = state.matchType === "Kamp" ? "kampe" : state.matchType === "stævne" ? "stævner" : "kampe/stævner";
+  const unit = state.matchType === "stævne" ? "stævner" : "kampe";
+
+  const rows = DATA.players.map(p => {
+    const r = { name: p.name, selected: 0, available: 0, declined: 0, noreply: 0 };
+    for (const a of acts) {
+      const s = idx.get(a.activity_id + "|" + p.id);
+      if (s === "Udtaget" || s === "Tilmeldt") r.selected++;
+      else if (s === "Til rådighed") r.available++;
+      else if (s === "Frameldt") r.declined++;
+      else if (s === "Ikke svaret") r.noreply++;
+    }
+    r.offered = r.selected + r.available;
+    r.rate = pct(r.selected, r.offered);
+    return r;
+  });
+
+  const totalSelected = rows.reduce((s, r) => s + r.selected, 0);
+  const totalOffered = rows.reduce((s, r) => s + r.offered, 0);
+  const segs = r => [
+    { n: r.selected, color: "--selected", label: "Udtaget" },
+    { n: r.available, color: "--available", label: "Ikke udtaget (men til rådighed)" },
+    { n: r.declined, color: "--declined", label: "Frameldt" },
+    { n: r.noreply, color: "--noreply", label: "Ikke svaret" },
+  ];
+
+  document.getElementById("tab-matches").innerHTML =
+    `<p class="scope">${scopeHtml(acts, noun)}</p>` +
+    tiles([
+      { value: acts.length, label: "Afviklede " + noun },
+      { value: totalOffered, label: "Gange spillere har været til rådighed" },
+      { value: totalSelected, label: "Udtagelser i alt" },
+      { value: (pct(totalSelected, totalOffered) ?? "–") + " %", label: "Udtaget, når til rådighed" },
+    ]) +
+    `<h2>Til rådighed og udtaget pr. spiller</h2>` +
+    `<details class="explain"><summary>Sådan læses tallene</summary><ul>
+      <li><b>Til rådighed i alt</b> = udtaget + til rådighed uden at blive udtaget.</li>
+      <li><b>Udtaget %</b> = udtaget ÷ til rådighed i alt (fx 6/8). Afbud og „ikke svaret“ tæller ikke med – se dem i kolonnerne/bjælken.</li>
+      <li><span class="low-n">Grå kursiv</span> procent bygger på under 3 ${unit} og skal tages med forbehold.</li>
+      <li>Spillere uden data i udsnittet står altid nederst.</li>
+      <li>Ved stævner med tilmelding tæller en tilmelding som udtaget – derfor viser „Kampe“ som standard kun turneringskampe.</li>
+    </ul></details>` +
+    legend([
+      { color: "--selected", label: "Udtaget" },
+      { color: "--available", label: "Ikke udtaget (men til rådighed)" },
+      { color: "--declined", label: "Frameldt" },
+      { color: "--noreply", label: "Ikke svaret" },
+    ]) +
+    renderTable("matches", [
+      { key: "name", label: "Spiller", render: r => `${esc(r.name)}<div class="mini">${bar(segs(r))}</div>` },
+      { key: "offered", label: "Til rådighed i alt", short: "Rådig" },
+      { key: "selected", label: "Udtaget" },
+      { key: "available", label: "Ikke udtaget", opt: true },
+      { key: "rate", label: "Udtaget %", short: "Udt. %", firstDir: "asc", render: r => rateHtml(r.rate, r.selected, r.offered, unit) },
+      { key: "declined", label: "Frameldt", opt: true },
+      { key: "noreply", label: "Ikke svaret", opt: true },
+      { key: "bar", label: "Fordeling", cls: "bar-cell", render: r => bar(segs(r)) },
+    ], rows, { key: "offered", dir: "desc" }) +
+    matchListHtml(acts, idx, noun);
+}
+
+// Hvilke kampe/stævner tallene bygger på (nyeste først); sammenfoldet, så oversigten er uændret.
+// Hver række kan klappes ud og viser spillerne fordelt på status.
+const ACT_GROUPS = [
+  { label: "Udtaget", color: "--selected", match: s => s === "Udtaget" || s === "Tilmeldt" },
+  { label: "Til rådighed, ikke udtaget", color: "--available", match: s => s === "Til rådighed" },
+  { label: "Frameldt", color: "--declined", match: s => s === "Frameldt" },
+  { label: "Ikke svaret", color: "--noreply", match: s => s === "Ikke svaret" },
+];
+
+function matchListHtml(acts, idx, noun) {
+  if (!acts.length) return "";
+  const players = [...DATA.players].sort((a, b) => a.name.localeCompare(b.name, "da"));
+  const body = [...acts].reverse().map(a => {
+    const groups = ACT_GROUPS.map(g => ({ ...g, names: players.filter(p => g.match(idx.get(a.activity_id + "|" + p.id))).map(p => p.name) }));
+    const [selected, available] = groups;
+    const open = state.openActs.has(a.activity_id);
+    const detailId = "act-" + a.activity_id;
+    // DBU har kun resultater for nogle turneringskampe, så resultatet står på underlinjen, når det findes
+    const sub = [fmtDate(a.date), a.type !== "Kamp" && a.type, a.result && "Resultat " + a.result].filter(Boolean).map(esc).join(" · ");
+    const detail = groups.filter(g => g.names.length).map(g =>
+      `<div class="act-group"><div class="act-group-head"><i class="swatch" style="${fill(g.color)}" aria-hidden="true"></i>${esc(g.label)} (${g.names.length})</div>` +
+      `<div class="act-names">${g.names.map(esc).join(", ")}</div></div>`).join("") || `<span class="empty">Ingen spillere registreret</span>`;
+    return `<tr class="act-row"><th scope="row"><button type="button" class="act-toggle" aria-expanded="${open}" aria-controls="${detailId}" data-act="${a.activity_id}">` +
+      `<span class="chev" aria-hidden="true"></span><span>${esc(a.title)}<span class="sub">${sub}</span></span></button></th>` +
+      `<td>${selected.names.length}<span class="frac">af ${selected.names.length + available.names.length}</span></td></tr>` +
+      `<tr class="act-detail" id="${detailId}"${open ? "" : " hidden"}><td colspan="2">${detail}</td></tr>`;
+  }).join("");
+  return `<h2>Kampe og stævner</h2>` +
+    `<details class="explain actlist"${state.showActs ? " open" : ""}><summary>Vis ${esc(noun)} i udsnittet (${acts.length})</summary>` +
+    `<div class="table-wrap"><table><thead><tr><th scope="col">${esc(noun[0].toUpperCase() + noun.slice(1))}</th><th scope="col">Udtaget</th></tr></thead>` +
+    `<tbody>${body}</tbody></table></div></details>`;
+}
+
+// Klap en kamp ud/ind uden at tegne fanen igen
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".act-toggle");
+  if (!btn) return;
+  const open = btn.getAttribute("aria-expanded") !== "true";
+  btn.setAttribute("aria-expanded", open);
+  document.getElementById(btn.getAttribute("aria-controls")).hidden = !open;
+  if (open) state.openActs.add(btn.dataset.act); else state.openActs.delete(btn.dataset.act);
+});
+
+// ---------- Træning ----------
+const TRAINING_STATUS = {
+  "Tilmeldt": { cls: "s-yes", color: "--selected", cell: "--cell-yes", sym: "✓", label: "Tilmeldt" },
+  "Frameldt": { cls: "s-no", color: "--declined", cell: "--cell-no", sym: "✕", label: "Frameldt" },
+  "Ikke svaret": { cls: "s-noreply", color: "--noreply", cell: "--noreply", sym: "?", label: "Ikke svaret" },
+};
+
+function renderTraining() {
+  const idx = statusIndex();
+  const acts = pastActivities(a => a.type === TRAINING_TYPE);
+
+  const rows = DATA.players.map(p => {
+    const r = { name: p.name, id: p.id, yes: 0, no: 0, noreply: 0 };
+    for (const a of acts) {
+      const s = idx.get(a.activity_id + "|" + p.id);
+      if (s === "Tilmeldt") r.yes++;
+      else if (s === "Frameldt") r.no++;
+      else if (s === "Ikke svaret") r.noreply++;
+    }
+    r.total = r.yes + r.no + r.noreply;
+    r.rate = pct(r.yes, r.total);
+    return r;
+  });
+  const avg = pct(rows.reduce((s, r) => s + r.yes, 0), rows.reduce((s, r) => s + r.total, 0));
+  const perTraining = acts.length ? Math.round(rows.reduce((s, r) => s + r.yes, 0) / acts.length) : 0;
+
+  // Oversigten viser de valgte træninger (højst 20), ellers de seneste 12
+  const recent = acts.slice(-(state.lastN || 12));
+  const trainingSegs = r => [
+    { n: r.yes, color: "--selected", label: "Tilmeldt" },
+    { n: r.no, color: "--declined", label: "Frameldt" },
+    { n: r.noreply, color: "--noreply", label: "Ikke svaret" },
+  ];
+  const gridRows = [...rows].sort((a, b) => a.name.localeCompare(b.name, "da")).map(r =>
+    `<tr><th scope="row" class="name">${esc(r.name)}</th>${recent.map(a => {
+      const st = TRAINING_STATUS[idx.get(a.activity_id + "|" + r.id)];
+      const when = esc(fmtDate(a.date));
+      return st
+        ? `<td><div class="cell ${st.cls}" style="background:var(${st.cell})" role="img" aria-label="${when}: ${st.label}" data-tip="${when}: ${st.label}"><span aria-hidden="true">${st.sym}</span></div></td>`
+        : `<td><div class="cell" role="img" aria-label="${when}: ikke på holdet" data-tip="${when}: ikke på holdet"><span aria-hidden="true">·</span></div></td>`;
+    }).join("")}</tr>`).join("");
+
+  document.getElementById("tab-training").innerHTML =
+    `<p class="scope">${scopeHtml(acts, "træninger")}</p>` +
+    tiles([
+      { value: acts.length, label: "Afviklede træninger" },
+      { value: (avg ?? "–") + " %", label: "Gennemsnitligt tilmeldt" },
+      { value: perTraining, label: "Tilmeldte pr. træning i snit" },
+    ]) +
+    `<h2>${recent.length < acts.length ? `Seneste ${recent.length} af ${acts.length} træninger` : `${recent.length} træninger`}</h2>` +
+    legend(Object.values(TRAINING_STATUS).map(s => ({ color: s.color, label: `${s.sym} ${s.label}` }))) +
+    (recent.length ? `<div class="grid-wrap"><table class="grid"><thead><tr><th scope="col"><span class="sr-only">Spiller</span></th>${recent.map(a => `<th scope="col" aria-label="${esc(fmtDate(a.date))}">${shortDate(a.date)}</th>`).join("")}</tr></thead><tbody>${gridRows}</tbody></table></div>` : `<p class="empty">Ingen træninger i perioden.</p>`) +
+    `<h2>Tilmelding pr. spiller</h2>` +
+    `<p class="muted small" style="margin-top:-4px">Tilmeldt % = tilmeldt ÷ alle træninger i udsnittet (fx 9/12). Baseret på tilmeldinger i DBU KampKlar, ikke faktisk fremmøde. Sortér på „Ikke svaret“ for at se, hvem der sjældent svarer.</p>` +
+    renderTable("training", [
+      { key: "name", label: "Spiller", render: r => `${esc(r.name)}<div class="mini">${bar(trainingSegs(r))}</div>` },
+      { key: "yes", label: "Tilmeldt" },
+      { key: "rate", label: "Tilmeldt %", short: "%", render: r => rateHtml(r.rate, r.yes, r.total, "træninger") },
+      { key: "no", label: "Frameldt", opt: true },
+      { key: "noreply", label: "Ikke svaret", opt: true },
+      { key: "bar", label: "Fordeling", cls: "bar-cell", render: r => bar(trainingSegs(r)) },
+    ], rows, { key: "rate", dir: "desc" });
+}
+
+// ---------- Kommende ----------
+function renderUpcoming() {
+  const idx = statusIndex();
+  const names = new Map(DATA.players.map(p => [p.id, p.name]));
+  const acts = DATA.activities
+    .filter(a => a.date >= today && (a.type === TRAINING_TYPE || MATCH_TYPES.includes(a.type)))
+    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))
+    .slice(0, 8);
+
+  const card = a => {
+    const isMatch = MATCH_TYPES.includes(a.type);
+    const groups = isMatch
+      ? [["Udtaget", ["Udtaget", "Tilmeldt"], "--selected"], ["Til rådighed", ["Til rådighed"], "--available"], ["Frameldt", ["Frameldt"], "--declined"], ["Ikke svaret", ["Ikke svaret"], "--noreply"]]
+      : [["Kommer", ["Tilmeldt"], "--selected"], ["Kommer ikke", ["Frameldt"], "--declined"], ["Ikke svaret", ["Ikke svaret"], "--noreply"]];
+    const html = groups.map(([label, statuses, color]) => {
+      const who = DATA.players.filter(p => statuses.includes(idx.get(a.activity_id + "|" + p.id))).map(p => p.name.split(" ")[0] + " " + (p.name.split(" ").slice(-1)[0][0] || "") + ".");
+      return `<div class="group"><div class="group-title"><i class="swatch" style="${fill(color)}" aria-hidden="true"></i>${label} (${who.length})</div>
+        <div class="group-names">${who.length ? who.map(esc).join(", ") : '<span class="empty">ingen</span>'}</div></div>`;
+    }).join("");
+    return `<div class="card"><h3>${esc(a.title)}</h3><div class="when">${esc(a.type)} · ${esc(fmtDate(a.date))}${a.start ? " kl. " + esc(a.start) : ""}</div>${html}</div>`;
+  };
+
+  document.getElementById("tab-upcoming").innerHTML = acts.length
+    ? `<div class="upcoming">${acts.map(card).join("")}</div>`
+    : `<p class="empty">Ingen kommende aktiviteter.</p>`;
+}
+
+// ---------- Opgaver ----------
+// Fra DBU's opgavefordeling og holdlederens Excel-ark (historik før DBU blev brugt til det)
+const TASK_TYPES = [
+  { key: "Tøjvask", label: "Tøjvask" },
+  { key: "Kørsel", label: "Kørsel" },
+  { key: "Snack", label: "Snack" },
+  { key: "Kiosk", label: "Kiosk" },
+];
+
+function renderTasks() {
+  const types = TASK_TYPES.filter(k => state.taskType === "all" || k.key === state.taskType);
+  let tasks = (DATA.tasks || []).filter(t => inPeriod(t.date) && types.some(k => k.key === t.task));
+  // "Seneste N" tæller kampe/stævner/kioskuger med opgaver (tasks er sorteret efter dato)
+  let occasions = [...new Map(tasks.filter(t => t.date <= today).map(t => [t.date + "|" + t.act, { date: t.date }])).entries()];
+  if (state.lastN) {
+    occasions = occasions.slice(-state.lastN);
+    const keep = new Set(occasions.map(([k]) => k));
+    tasks = tasks.filter(t => keep.has(t.date + "|" + t.act));
+  }
+  const done = tasks.filter(t => t.date <= today);
+
+  const rows = DATA.players.map(p => {
+    const mine = tasks.filter(t => t.pid === p.id);
+    const past = mine.filter(t => t.date <= today);
+    const r = { id: p.id, name: p.name, items: mine, total: past.length, last: past.at(-1)?.date ?? null };
+    for (const k of types) r[k.key] = past.filter(t => t.task === k.key).length;
+    return r;
+  });
+  const summary = r => [...(types.length > 1 ? types.filter(k => r[k.key]).map(k => `${k.short || k.label} ${r[k.key]}`) : []), r.last && "sidst " + shortDate(r.last)]
+    .filter(Boolean).join(" · ") || "ingen opgaver";
+
+  // Klik på en spiller: alle spillerens opgaver i udsnittet, nyeste først
+  const detail = (r, span) => {
+    const open = state.openActs.has("p" + r.id);
+    const list = r.items.length
+      ? `<ul class="task-items">${[...r.items].reverse().map(t =>
+          `<li><b>${esc(t.task)}</b> · ${esc(t.act)} <span class="frac">${esc(fmtDate(t.date))}${t.date > today ? " · kommende" : ""}</span></li>`).join("")}</ul>`
+      : `<span class="empty">Ingen opgaver i udsnittet</span>`;
+    return `<tr class="act-detail" id="pt-${r.id}"${open ? "" : " hidden"}><td colspan="${span}">${list}</td></tr>`;
+  };
+  const nameCell = r => `<button type="button" class="act-toggle" aria-expanded="${state.openActs.has("p" + r.id)}" aria-controls="pt-${r.id}" data-act="p${r.id}">` +
+    `<span class="chev" aria-hidden="true"></span><span>${esc(r.name)}<span class="mini small muted">${esc(summary(r))}</span></span></button>`;
+
+  // Liste pr. kamp/kiosk-uge, nyeste først (inkl. kommende, hvor opgaven allerede er tildelt)
+  const groups = new Map();
+  for (const t of tasks) {
+    const k = t.date + "|" + t.act;
+    if (!groups.has(k)) groups.set(k, { date: t.date, act: t.act, items: [] });
+    groups.get(k).items.push(t);
+  }
+  const list = [...groups.values()].reverse().map(g =>
+    `<tr><th scope="row">${esc(g.act)}<span class="sub">${esc(fmtDate(g.date))}${g.date > today ? " · kommende" : ""}</span></th>` +
+    `<td>${g.items.map(t => `${esc(t.name)} <span class="frac">${esc(t.task)}</span>`).join("<br>")}</td></tr>`).join("");
+
+  document.getElementById("tab-tasks").innerHTML =
+    `<p class="scope">${scopeHtml(occasions.map(([, o]) => o), "kampe/stævner/kioskuger med opgaver")}</p>` +
+    tiles(types.map(k => ({ value: done.filter(t => t.task === k.key).length, label: k.label }))) +
+    `<h2>Opgaver pr. spiller</h2>` +
+    `<details class="explain"><summary>Sådan læses tallene</summary><ul>
+      <li>Tæller udførte opgaver i udsnittet: tøjvask, kørsel, snack og kioskvagter. „Seneste“ tæller kampe/stævner/kioskuger med opgaver.</li>
+      <li>Tryk på en spiller for at se spillerens opgaver.</li>
+      <li>Historikken frem til september 2026 kommer fra holdlederens Excel-ark; nyere opgaver fra opgavefordelingen i DBU KampKlar.</li>
+      <li>Sortér på „${types.length > 1 ? "I alt" : esc(types[0].label)}“ for at se, hvem der står for tur.</li>
+    </ul></details>` +
+    renderTable("tasks", [
+      { key: "name", label: "Spiller", render: nameCell },
+      ...(types.length > 1 ? [{ key: "total", label: "I alt", firstDir: "asc" }] : []),
+      ...types.map(k => ({ key: k.key, label: k.label, short: k.short, firstDir: "asc", opt: types.length > 1 })),
+      { key: "last", label: "Sidst", firstDir: "asc", opt: true, render: r => r.last ? esc(fmtDate(r.last)) : "–" },
+    ], rows, { key: types.length > 1 ? "total" : types[0].key, dir: "asc" }, detail) +
+    (list ? `<h2>Opgaver pr. kamp</h2><details class="explain actlist tasklist"${state.showTasks ? " open" : ""}><summary>Vis opgaver i udsnittet (${groups.size})</summary>` +
+      `<div class="table-wrap"><table><thead><tr><th scope="col">Kamp/stævne</th><th scope="col">Opgaver</th></tr></thead><tbody>${list}</tbody></table></div></details>` : "");
+}
+
+// ---------- Kommunikation ----------
+// Mail til en kommende kamp/stævne: udtagelse (fra DBU eller fair forslag) og opgaver, klar til DBU-appen.
+// Trænerregler: trænerne kører altid, når de kommer; Theo og Emil er altid med og får ikke snack/tøjvask.
+const RULES = {
+  coachDrivers: ["Jonas Pedersen", "Troels Skjellerup Rahbæk"],
+  alwaysPick: ["Theo Valdemar Skjellerup Rahbæk", "Emil Rydén"],
+  noChores: ["Theo Valdemar Skjellerup Rahbæk", "Emil Rydén"],
+  // Kører træneren, registreres kørslen på barnet (opgaver i DBU hører til spilleren)
+  coachChild: { "Troels Skjellerup Rahbæk": "Theo Valdemar Skjellerup Rahbæk", "Jonas Pedersen": "Emil Rydén" },
+};
+const COMMS_TASKS = [["Tøjvask", 1], ["Snack", 1], ["Kørsel", 3]];
+const COMING = ["Udtaget", "Tilmeldt", "Til rådighed"];
+const FAIR_MATCHES = 10;
+const MAIL_SIGNATURE = ["Mvh.", "", "HSK U12 Trænerteamet"];
+// over: manuelle valg pr. plads ("Opgave|i" -> person-id, "" = tom); extra: ekstra pladser pr. opgave
+const comms = { act: null, n: 11, picked: null, meet: null, place: "klubhuset", home: null, over: {}, extra: {} };
+const resetTasks = () => { comms.over = {}; comms.extra = {}; comms.fromDbu = new Set(); };
+// Opgaver (tøjvask/snack/kørsel), der allerede står i DBU på aktiviteten
+const dbuTasksFor = aid => (DATA.tasks || []).filter(t => t.aid === aid && COMMS_TASKS.some(([k]) => k === t.task));
+// Lægger DBU's tildelinger ind som låste valg i felterne; tomme pladser fyldes stadig med forslag
+function seedFromDbu(a) {
+  resetTasks();
+  const byId = new Set(DATA.players.map(p => p.id));
+  for (const [task, count] of COMMS_TASKS) {
+    const list = dbuTasksFor(a.activity_id).filter(t => t.task === task && byId.has(t.pid));
+    comms.extra[task] = Math.max(0, list.length - count);
+    list.forEach((t, i) => { comms.over[`${task}|${i}`] = t.pid; comms.fromDbu.add(`${task}|${i}`); });
+  }
+}
+// Hjemmebane i Hadsten: "Hadsten SK - X" eller et stævne i Hadsten (ikke "X - Hadsten SK"). Ingen kørsel.
+const isHome = a => /^Hadsten/i.test(a.title) || (!/ - Hadsten/i.test(a.title) && /Hadsten/i.test(a.title));
+const commsTasks = () => COMMS_TASKS.filter(([t]) => !(comms.home && t === "Kørsel"));
+
+// Fornavn, eller fornavn + forbogstav i efternavn, hvis flere på holdet har samme fornavn
+function shortName(name) {
+  const first = name.split(" ")[0];
+  const same = DATA.players.filter(p => p.name.split(" ")[0] === first);
+  return same.length > 1 ? `${first} ${name.split(" ").slice(-1)[0][0]}.` : first;
+}
+
+function commsPlan(a) {
+  const idx = statusIndex();
+  const st = id => idx.get(a.activity_id + "|" + id);
+  const byName = new Map([...DATA.players, ...(DATA.staff || [])].map(p => [p.name, p]));
+
+  // Udtagelse: er nogen udtaget/tilmeldt i DBU, er holdet på plads
+  const fixed = DATA.players.filter(p => ["Udtaget", "Tilmeldt"].includes(st(p.id)));
+  const pool = DATA.players.filter(p => st(p.id) === "Til rådighed");
+  const past = DATA.activities.filter(x => MATCH_TYPES.includes(x.type) && x.date < today)
+    .sort((x, y) => (x.date + x.start).localeCompare(y.date + y.start)).slice(-FAIR_MATCHES);
+  const fair = new Map(DATA.players.map(p => {
+    let sel = 0, avail = 0;
+    for (const x of past) {
+      const s = idx.get(x.activity_id + "|" + p.id);
+      if (s === "Udtaget" || s === "Tilmeldt") sel++; else if (s === "Til rådighed") avail++;
+    }
+    return [p.id, { sel, avail }];
+  }));
+  const mode = fixed.length ? "dbu" : "auto";
+  const base = mode === "dbu" ? fixed : pool;
+  const must = base.filter(p => RULES.alwaysPick.includes(p.name));
+  const ranked = base.filter(p => !must.includes(p))
+    .sort((x, y) => fair.get(x.id).sel - fair.get(y.id).sel || fair.get(y.id).avail - fair.get(x.id).avail || x.name.localeCompare(y.name, "da"));
+  const candidates = [...must, ...ranked];
+  if (!comms.picked) {
+    comms.picked = new Set((mode === "dbu" ? candidates : candidates.slice(0, Math.max(comms.n, must.length))).map(p => p.id));
+  }
+  const selected = candidates.filter(p => comms.picked.has(p.id));
+
+  // Opgaver: færrest af typen de seneste 12 måneder, derefter længst siden sidst
+  const since = new Date(); since.setFullYear(since.getFullYear() - 1);
+  const sinceIso = since.toLocaleDateString("sv-SE");
+  const hist = (pid, task) => {
+    const mine = (DATA.tasks || []).filter(t => t.pid === pid && t.task === task && t.date >= sinceIso && t.date < today);
+    return { n: mine.length, last: mine.at(-1)?.date ?? "" };
+  };
+  const staffComing = (DATA.staff || []).filter(s => COMING.includes(st(s.id)));
+  const byId = new Map(DATA.players.map(p => [p.id, p]));
+  const used = new Set();
+  const slots = {};
+  for (const [task, count] of commsTasks()) slots[task] = Array(count + (comms.extra[task] || 0)).fill(undefined);
+  // 1) Manuelle valg låser pladsen
+  for (const [key, v] of Object.entries(comms.over)) {
+    const [task, i] = key.split("|");
+    if (!slots[task] || +i >= slots[task].length) continue;
+    const p = v && byId.get(v);
+    slots[task][+i] = p ? { id: p.id, name: p.name, why: comms.fromDbu?.has(key) ? "står i DBU" : "valgt manuelt", manual: true } : null;
+    if (p) used.add(p.id);
+  }
+  // 2) Trænerregel (kun i forslaget): træneren kører, registreret på barnet - men kun når barnet er med
+  if (slots["Kørsel"]) for (const name of RULES.coachDrivers) {
+    const c = byName.get(name);
+    const who = byName.get(RULES.coachChild[name]) || c;
+    const free = slots["Kørsel"].indexOf(undefined);
+    if (c && COMING.includes(st(c.id)) && selected.some(p => p.id === who.id) && free >= 0 && !slots["Kørsel"].some(x => x?.id === who.id)) {
+      slots["Kørsel"][free] = { id: who.id, name: who.name, why: `træner-regel: ${name.split(" ")[0]} kører` };
+      used.add(who.id);
+    }
+  }
+  // 3) Fair forslag på resten: færrest af typen, ingen dobbelt-opgaver hvis muligt
+  for (const [task] of commsTasks()) {
+    const pickOne = allowUsed => selected
+      .filter(p => (allowUsed || !used.has(p.id)) && !(task !== "Kørsel" && RULES.noChores.includes(p.name)))
+      .filter(p => !slots[task].some(x => x?.id === p.id))
+      .map(p => ({ p, h: hist(p.id, task) }))
+      .sort((x, y) => x.h.n - y.h.n || x.h.last.localeCompare(y.h.last) || x.p.name.localeCompare(y.p.name, "da"))[0];
+    slots[task].forEach((x, i) => {
+      if (x !== undefined) return;
+      const best = pickOne(false) || pickOne(true);
+      if (!best) { slots[task][i] = null; return; }
+      used.add(best.p.id);
+      slots[task][i] = { id: best.p.id, name: best.p.name,
+        why: `${task.toLowerCase()} ${best.h.n} ${best.h.n === 1 ? "gang" : "gange"} seneste 12 mdr.${best.h.last ? ", sidst " + shortDate(best.h.last) : ""}` };
+    });
+  }
+  const assign = Object.fromEntries(Object.entries(slots).map(([t, xs]) => [t, xs.filter(Boolean)]));
+  return { mode, candidates, must, fair, past, selected, assign, slots, staffComing, pool, fixed };
+}
+
+function commsMail(a, plan) {
+  const d = new Date(a.date + "T12:00:00");
+  const day = d.toLocaleDateString("da-DK", { weekday: "long" });
+  const dato = d.toLocaleDateString("da-DK", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\./g, "-");
+  const nameOf = x => x.id ? shortName(x.name) : x.name.split(" ")[0];
+  const lines = [
+    a.title, "",
+    `${day[0].toUpperCase() + day.slice(1)} d. ${dato}`,
+    `Mødetid kl. ${comms.meet.replace(":", ".")}${comms.place ? " ved " + comms.place : ""}`,
+    a.start ? `${GAME_TYPES.includes(a.type) ? "Kampstart" : "Start"} kl. ${a.start.replace(":", ".")}` : "", "",
+    ...plan.selected.map(p => p.name).sort((x, y) => x.localeCompare(y, "da")), "",
+    ...plan.staffComing.map(s => s.name), "",
+    ...commsTasks().map(([t]) => `${t}: ${plan.assign[t].map(nameOf).join(", ") || "-"}`), "",
+    ...MAIL_SIGNATURE,
+  ];
+  return lines.filter((l, i, arr) => !(l === "" && arr[i - 1] === "")).join("\n").trim() + "\n";
+}
+
+function renderComms() {
+  const el = document.getElementById("tab-comms");
+  const acts = DATA.activities.filter(a => a.date >= today && MATCH_TYPES.includes(a.type))
+    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  if (!acts.length) { el.innerHTML = `<p class="empty">Ingen kommende kampe eller stævner.</p>`; return; }
+  if (!acts.some(a => a.activity_id === comms.act)) { comms.act = acts[0].activity_id; comms.picked = null; comms.meet = null; comms.home = null; resetTasks(); }
+  const a = acts.find(x => x.activity_id === comms.act);
+  if (comms.home === null) comms.home = isHome(a);
+  if (comms.seeded !== a.activity_id) { comms.seeded = a.activity_id; seedFromDbu(a); }
+  if (comms.meet === null) {
+    const [h, m] = (a.start || "10:00").split(":").map(Number);
+    const t = Math.max(0, h * 60 + m - 60);
+    comms.meet = `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+  }
+  const plan = commsPlan(a);
+  comms.plan = plan;
+  const mail = commsMail(a, plan);
+
+  const status = plan.mode === "dbu"
+    ? `<p class="muted small">Holdet er udtaget i DBU (${plan.fixed.length}), så udtagelsen bruges som den er. Fjern et flueben for at udelade en spiller fra mailen.</p>`
+    : `<p class="muted small">Ikke udtaget i DBU endnu. ${plan.pool.length} spillere er til rådighed. Forslaget tager Theo og Emil (træner-regel) og derefter dem, der er udtaget færrest gange i de seneste ${plan.past.length} kampe/stævner. Ved lige stand vælges den, der oftest har været til rådighed uden at komme med.</p>`;
+  const picks = plan.candidates.map(p => {
+    const f = plan.fair.get(p.id);
+    const rule = plan.must.includes(p) ? ` <span class="rule">træner-regel</span>` : "";
+    return `<li><input type="checkbox" id="pick-${p.id}" data-pick="${p.id}"${comms.picked.has(p.id) ? " checked" : ""}>` +
+      `<label for="pick-${p.id}">${esc(p.name)}${rule}<span class="why">Udtaget ${f.sel} af seneste ${plan.past.length}${f.avail ? `, til rådighed uden at komme med ${f.avail}` : ""}</span></label></li>`;
+  }).join("");
+  const inSel = new Set(plan.selected.map(p => p.id));
+  const others = DATA.players.filter(p => !inSel.has(p.id)).sort((x, y) => x.name.localeCompare(y.name, "da"));
+  const taskOf = new Map();
+  for (const [t, xs] of Object.entries(plan.assign)) for (const x of xs) taskOf.set(x.id, [...(taskOf.get(x.id) || []), t]);
+  const opts = (cur) => `<option value="">–</option>` +
+    `<optgroup label="Med til kampen">${plan.selected.map(p => `<option value="${p.id}"${p.id === cur ? " selected" : ""}>${esc(p.name)}</option>`).join("")}</optgroup>` +
+    (others.length ? `<optgroup label="Øvrige spillere">${others.map(p => `<option value="${p.id}"${p.id === cur ? " selected" : ""}>${esc(p.name)}</option>`).join("")}</optgroup>` : "");
+  const tasks = commsTasks().map(([t, count], k) => `<li class="task-row"><b>${t}</b>` +
+    plan.slots[t].map((x, i) => {
+      const dup = x && taskOf.get(x.id).length > 1 ? ` · har også ${taskOf.get(x.id).filter(o => o !== t).join(", ").toLowerCase()}` : "";
+      return `<div class="slot"><select id="slot-${k}-${i}" data-slot="${t}|${i}" aria-label="${t} ${i + 1}">${opts(x?.id)}</select>` +
+        `<span class="why">${x ? esc(x.why + dup) : "ingen"}</span></div>`;
+    }).join("") +
+    `<div class="slot-actions"><button type="button" class="linkbtn small" data-add-slot="${t}">+ plads</button>` +
+    (plan.slots[t].length > count ? ` <button type="button" class="linkbtn small" data-del-slot="${t}">− plads</button>` : "") + `</div></li>`).join("");
+
+  el.innerHTML =
+    `<div class="comms-form">` +
+    `<label>Aktivitet<select id="commsAct">${acts.map(x => `<option value="${x.activity_id}"${x.activity_id === comms.act ? " selected" : ""}>${esc(fmtDate(x.date))} · ${esc(x.title)}</option>`).join("")}</select></label>` +
+    (plan.mode === "auto" ? `<label>Antal spillere<input type="number" id="commsN" min="1" max="30" value="${comms.n}"></label>` : "") +
+    `<label>Mødetid<input type="time" id="commsMeet" value="${comms.meet}"></label>` +
+    `<label>Mødested<input type="text" id="commsPlace" value="${esc(comms.place)}"></label>` +
+    `<label class="check"><input type="checkbox" id="commsHome"${comms.home ? " checked" : ""}> Hjemmebane (ingen kørsel)</label>` +
+    `<button type="button" class="btn" id="commsReset">Nyt forslag</button>` +
+    `</div>` +
+    `<div class="comms">` +
+    `<div class="card"><h3>Spillere (${plan.selected.length} med)</h3>${status}` +
+    (picks ? `<ul class="pick-list">${picks}</ul>` : `<p class="empty">Ingen spillere er udtaget eller til rådighed endnu.</p>`) +
+    `<h3 style="margin-top:16px">Opgaver</h3>` +
+    (dbuTasksFor(a.activity_id).length
+      ? `<p class="muted small">${dbuTasksFor(a.activity_id).length} opgaver står allerede i DBU og er hentet ind i felterne. „Nyt forslag“ giver et frisk forslag; <button type="button" class="linkbtn" id="commsFromDbu">hent fra DBU igen</button>.</p>`
+      : `<p class="muted small">Ingen opgaver i DBU endnu; felterne viser et forslag.</p>`) +
+    `<ul class="task-assign">${tasks}</ul>` +
+    `<p class="muted small">Ved hjemmekampe i Hadsten er der ingen kørsel. Ellers kører Jonas og Troels, når de kommer og deres søn er med; kørslen registreres på sønnen (Theo og Emil R.). Theo og Emil R. foreslås ikke til snack eller tøjvask. Ellers går opgaven til den, der har haft den færrest gange de seneste 12 måneder. Ingen får to opgaver, hvis det kan undgås. Vælg selv i felterne for at rette; dine valg bevares, og resten fyldes ud omkring dem. „Nyt forslag“ nulstiller.</p></div>` +
+    `<div class="card"><h3>Mail til DBU-appen</h3><p class="muted small">Ret gerne i teksten. Kopiér den, og indsæt den som besked i DBU-appen.</p>` +
+    `<textarea class="mail" id="commsMail" rows="${mail.split("\n").length + 1}" aria-label="Mailtekst">${esc(mail)}</textarea>` +
+    `<div class="mail-actions"><button type="button" class="btn primary" id="commsCopy">Kopiér mail</button><span class="muted small" id="commsCopied" role="status"></span></div>` +
+    (ROLE === "traener" ? dbuButtonHtml() : "") + `</div>` +
+    `</div>`;
+}
+
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (!t.closest("#tab-comms") || t.id === "commsMail") return;
+  if (t.id === "commsAct") { comms.act = t.value; comms.picked = null; comms.meet = null; comms.home = null; resetTasks(); }
+  else if (t.dataset.slot) { comms.over[t.dataset.slot] = t.value; comms.fromDbu?.delete(t.dataset.slot); }
+  else if (t.id === "commsHome") comms.home = t.checked;
+  else if (t.id === "commsN") { comms.n = Math.max(1, Number(t.value) || 11); comms.picked = null; }
+  else if (t.id === "commsMeet") comms.meet = t.value || comms.meet;
+  else if (t.id === "commsPlace") comms.place = t.value;
+  else if (t.dataset.pick) { if (t.checked) comms.picked.add(t.dataset.pick); else comms.picked.delete(t.dataset.pick); }
+  else return;
+  const focusId = t.id;
+  renderComms();
+  document.getElementById(focusId)?.focus();
+});
+document.addEventListener("click", async e => {
+  if (e.target.id === "commsReset") { comms.picked = null; resetTasks(); renderComms(); }
+  if (e.target.id === "commsFromDbu") { comms.seeded = null; renderComms(); }
+  const add = e.target.dataset?.addSlot, del = e.target.dataset?.delSlot;
+  if (add) { comms.extra[add] = (comms.extra[add] || 0) + 1; renderComms(); }
+  if (del) {
+    const n = COMMS_TASKS.find(([t]) => t === del)[1] + comms.extra[del] - 1;
+    delete comms.over[`${del}|${n}`];
+    comms.extra[del]--; renderComms();
+  }
+  if (e.target.id === "commsCopy") {
+    const ta = document.getElementById("commsMail");
+    try { await navigator.clipboard.writeText(ta.value); }
+    catch { ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length); document.execCommand("copy"); }
+    document.getElementById("commsCopied").textContent = "Kopieret";
+  }
+});
+
+// ---------- Tildel opgaver i DBU (kun Troels) ----------
+// Knappen starter workflowen assign.yml i det private repo med Troels' egen GitHub-token.
+// Tokenen gemmes kun i denne browser (localStorage) og er aldrig en del af siden eller repoet.
+// Andre kan se knappen, men kan ikke starte noget uden en token med adgang til repoet.
+const GH = { repo: "troelssn/dbu-trainer", workflow: "assign.yml", key: "hsk2015-gh-token" };
+const ghToken = {
+  get() { try { return localStorage.getItem(GH.key); } catch { return null; } },
+  set(v) { try { localStorage.setItem(GH.key, v); } catch {} },
+  clear() { try { localStorage.removeItem(GH.key); } catch {} },
+};
+
+function dbuItems() {
+  const plan = comms.plan;
+  return plan ? commsTasks().flatMap(([t]) => plan.assign[t].filter(x => x.id).map(x => ({ name: x.name, task: t }))) : [];
+}
+
+function dbuButtonHtml() {
+  const st = comms.dbu && comms.dbu.act === comms.act ? comms.dbu : null;
+  return `<div class="dbu-assign"><h3>Opgaver i DBU</h3>` +
+    `<div class="mail-actions"><button type="button" class="btn" id="dbuAssign"${st?.busy ? " disabled" : ""}>Tildel opgaver i DBU</button>` +
+    `<button type="button" class="btn" id="dbuClear"${st?.busy ? " disabled" : ""}>Fjern opgaver i DBU</button>` +
+    (ghToken.get() ? `<button type="button" class="linkbtn small" id="dbuForget">Glem token</button>` : "") + `</div>` +
+    `<p class="muted small" id="dbuStatus" role="status">${st ? st.html : "<b>Tildel</b> tilføjer de opgaver ovenfor, der mangler i DBU. <b>Fjern</b> sletter alle tøjvask-, snack- og kørselsopgaver på aktiviteten i DBU, så du kan tildele forfra. Kræver Troels' GitHub-token."}</p></div>`;
+}
+
+function dbuStatus(html, busy = false) {
+  comms.dbu = { act: comms.act, html, busy };
+  const el = document.getElementById("dbuStatus");
+  if (el) el.innerHTML = html;
+  for (const id of ["dbuAssign", "dbuClear"]) { const btn = document.getElementById(id); if (btn) btn.disabled = busy; }
+}
+
+async function gh(path, token, opts = {}) {
+  return fetch(`https://api.github.com/repos/${GH.repo}${path}`, {
+    ...opts,
+    headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${token}`, "X-GitHub-Api-Version": "2022-11-28", ...(opts.headers || {}) },
+  });
+}
+
+async function dbuRun(mode) {
+  const a = DATA.activities.find(x => x.activity_id === comms.act);
+  if (!a) return;
+  const clear = mode === "clear";
+  const items = clear ? [] : dbuItems();
+  const verb = clear ? "Fjerner" : "Tildeler";
+  if (clear) {
+    const known = dbuTasksFor(a.activity_id).map(t => `• ${t.task}: ${t.name}`).join("\n") || "(siden kender ingen endnu - DBU tjekkes alligevel)";
+    if (!confirm(`Fjern ALLE tøjvask-, snack- og kørselsopgaver i DBU på "${a.title}" (${fmtDate(a.date)})?\n\nSiden kender disse:\n${known}\n\nKiosk og andre opgaver røres ikke.`)) return;
+  } else {
+    if (!items.length) { dbuStatus("Der er ingen opgaver at tildele."); return; }
+    const list = items.map(i => `• ${i.task}: ${i.name}`).join("\n");
+    if (!confirm(`Tildel disse opgaver i DBU på "${a.title}" (${fmtDate(a.date)})?\n\n${list}\n\nHver tildeling giver en besked i forældrenes Beskedcenter. Opgaver, der allerede står i DBU, springes over.`)) return;
+  }
+  let token = ghToken.get();
+  if (!token) {
+    token = (prompt("Indsæt din GitHub-token (fine-grained, kun repoet troelssn/dbu-trainer, Actions: Read and write).\nDen gemmes kun i denne browser.") || "").trim();
+    if (!token) return;
+    ghToken.set(token);
+    renderComms();
+  }
+  const requestId = Math.random().toString(36).slice(2, 10);
+  dbuStatus(`${verb} … starter`, true);
+  try {
+    const res = await gh(`/actions/workflows/${GH.workflow}/dispatches`, token, {
+      method: "POST",
+      body: JSON.stringify({ ref: "main", inputs: { activity_id: a.activity_id, tasks: JSON.stringify(items), mode, request_id: requestId } }),
+    });
+    if (res.status === 401 || res.status === 403 || res.status === 404) {
+      ghToken.clear();
+      dbuStatus(`GitHub afviste tokenen (${res.status}). Den er glemt; prøv igen med en token, der har Actions: Read and write på ${GH.repo}.`);
+      renderComms();
+      return;
+    }
+    if (!res.ok) { dbuStatus(`Kunne ikke starte (GitHub svarede ${res.status}).`); return; }
+    dbuStatus(`${verb} i DBU … venter`, true);
+    // Find kørslen via request_id i navnet, og vent til den er færdig (højst ca. 5 minutter)
+    let run = null;
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      const runs = await (await gh(`/actions/workflows/${GH.workflow}/runs?per_page=10&event=workflow_dispatch`, token)).json();
+      run = (runs.workflow_runs || []).find(r => (r.display_title || "").includes(`(${requestId})`)) || run;
+      if (run?.status === "completed") break;
+      if (run) dbuStatus(`${verb} i DBU … (${run.status === "queued" ? "i kø" : "kører"})`, true);
+    }
+    const link = run ? ` <a href="${run.html_url}" target="_blank" rel="noopener">Se detaljer</a>` : "";
+    if (!run || run.status !== "completed") dbuStatus(`Ikke færdig endnu.${link}`);
+    else if (run.conclusion === "success") dbuStatus(`${clear ? "Opgaverne er fjernet" : "Opgaverne er tildelt"} i DBU. Siden opdateres om et par minutter (genindlæs).${link}`);
+    else dbuStatus(`Det fejlede (${run.conclusion}).${link}`);
+  } catch (err) {
+    dbuStatus(`Fejl: ${esc(String(err.message || err))}`);
+  }
+}
+
+document.addEventListener("click", e => {
+  if (e.target.id === "dbuAssign") dbuRun("assign");
+  if (e.target.id === "dbuClear") dbuRun("clear");
+  if (e.target.id === "dbuForget") { ghToken.clear(); comms.dbu = null; renderComms(); }
+});
+
+// ---------- Navigation ----------
+function render() {
+  for (const t of TABS) document.getElementById("tab-" + t).hidden = t !== state.tab;
+  document.querySelectorAll(".tab").forEach(b => {
+    const on = b.dataset.tab === state.tab;
+    b.setAttribute("aria-selected", on);
+    b.tabIndex = on ? 0 : -1;
+  });
+  document.getElementById("filters").hidden = ["upcoming", "comms", "info"].includes(state.tab);
+  document.getElementById("matchTypeLabel").hidden = state.tab !== "matches";
+  document.getElementById("taskTypeLabel").hidden = state.tab !== "tasks";
+  ({ matches: renderMatches, training: renderTraining, upcoming: renderUpcoming, tasks: renderTasks, comms: renderComms, info: () => {} })[state.tab]();
+  // Træningsoversigten åbner ved de nyeste datoer (yderst til højre)
+  const grid = document.querySelector("#tab-training .grid-wrap");
+  if (grid && state.tab === "training") grid.scrollLeft = grid.scrollWidth;
+  savePrefs();
+}
+
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+  state.tab = b.dataset.tab;
+  render();
+  window.scrollTo({ top: 0 });
+}));
+
+document.querySelector(".tabs").addEventListener("keydown", e => {
+  const tabs = [...document.querySelectorAll(".tab")];
+  const i = tabs.findIndex(t => t.dataset.tab === state.tab);
+  const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+  if (next === undefined) return;
+  e.preventDefault();
+  const t = tabs[(next + tabs.length) % tabs.length];
+  state.tab = t.dataset.tab;
+  render();
+  t.focus();
+});
+
+// Kolonneoverskrifter skal hænge lige under de faste faner/filtre
+const controls = document.querySelector(".controls");
+const setControlsHeight = () => {
+  const sticky = getComputedStyle(controls).position === "sticky";
+  document.documentElement.style.setProperty("--controls-h", (sticky ? controls.offsetHeight : 0) + "px");
+};
+new ResizeObserver(setControlsHeight).observe(controls);
+window.addEventListener("resize", setControlsHeight);
+document.getElementById("period").addEventListener("change", e => { state.period = e.target.value; render(); });
+// Listen over kampe/stævner forbliver åben, når filtrene ændres
+document.addEventListener("toggle", e => { if (e.target.matches?.(".actlist")) state[e.target.matches(".tasklist") ? "showTasks" : "showActs"] = e.target.open; }, true);
+for (const [id, key, parse] of [["matchType", "matchType", String], ["taskType", "taskType", String], ["lastN", "lastN", Number]]) {
+  const el = document.getElementById(id);
+  el.value = String(state[key]);
+  if (el.selectedIndex < 0) { el.selectedIndex = 0; state[key] = parse(el.value); }
+  el.addEventListener("change", e => { state[key] = parse(e.target.value); render(); });
+}
+
+function showApp() {
+  document.getElementById("login").hidden = true;
+  document.getElementById("app").hidden = false;
+  document.body.dataset.role = ROLE;
+  document.getElementById("roleBadge").textContent = ROLES[ROLE].label;
+  const updated = new Date(DATA.generated);
+  document.getElementById("updated").textContent = "Data fra DBU KampKlar · opdateret " +
+    updated.toLocaleString("da-DK", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  fillPeriods();
+  render();
+  document.getElementById("appTitle").focus({ preventScroll: true });
+}
+
+// ---------- Tooltip (mus: følger markøren; touch: tryk på feltet) ----------
+const tip = document.getElementById("tip");
+let tipTimer;
+function showTip(text, x, y) {
+  tip.textContent = text;
+  tip.style.display = "block";
+  tip.style.left = Math.max(8, Math.min(x, window.innerWidth - tip.offsetWidth - 8)) + "px";
+  tip.style.top = Math.min(y, window.innerHeight - tip.offsetHeight - 8) + "px";
+}
+document.addEventListener("mousemove", e => {
+  if (matchMedia("(hover: none)").matches) return;
+  const el = e.target.closest("[data-tip]");
+  if (!el) { tip.style.display = "none"; return; }
+  showTip(el.dataset.tip, e.clientX + 12, e.clientY + 14);
+});
+document.addEventListener("click", e => {
+  if (!matchMedia("(hover: none)").matches) return;
+  const el = e.target.closest("[data-tip]");
+  clearTimeout(tipTimer);
+  if (!el) { tip.style.display = "none"; return; }
+  const r = el.getBoundingClientRect();
+  showTip(el.dataset.tip, r.left, r.bottom + 6);
+  tipTimer = setTimeout(() => { tip.style.display = "none"; }, 2500);
+});
+window.addEventListener("scroll", () => { tip.style.display = "none"; }, { passive: true });
+
+// Automatisk login hvis koden er husket
+const saved = store.get();
+if (saved) {
+  setRole(saved.role);
+  document.getElementById("remember").checked = true;
+  document.getElementById("login").hidden = true;
+  login(saved.role, saved.code, true);
+}
+</script>
+</body>
+</html>
